@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+	<!-- See http://wiki.openmrs.org/display/docs/Module+liquibase+File for 
+		documentation on this file. See http://www.liquibase.org/manual/home#available_database_refactorings 
+		for a list of supported elements and attributes -->
+
+
+	<changeSet id="onlinelogin-2021-06-27-19:55" author="vishwajeet">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="online_location_type" />
+			</not>
+		</preConditions>
+		<comment>
+			Creating the location table for online appointment
+		</comment>
+		<createTable tableName="online_location_type">
+			<column name="online_location_type_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="online_location_type" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdDateTime" type="DATETIME" />
+		</createTable>
+
+		<createTable tableName="online_locations">
+			<column name="online_location_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="online_location_name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="online_location_type_id" type="int"></column>
+			<column name="createdDateTime" type="DATETIME" />
+		</createTable>
+
+		<createTable tableName="online_hospitals">
+			<column name="online_hospital_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="online_hospital_name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="online_hospital_country" type="int"></column>
+			<column name="online_hospital_state" type="int"></column>
+			<column name="online_hospital_district" type="int"></column>
+			<column name="online_hospital_type" type="varchar(255)"></column>
+			<column name="createdDateTime" type="DATETIME" />
+		</createTable>
+
+		<addForeignKeyConstraint constraintName="online_location_type_id_fk" baseTableName="online_locations" baseColumnNames="online_location_type_id" referencedTableName="online_location_type" referencedColumnNames="online_location_type_id" deferrable="false" initiallyDeferred="false" />
+
+		<addForeignKeyConstraint constraintName="online_hospital_country_fk" baseTableName="online_hospitals" baseColumnNames="online_hospital_country" referencedTableName="online_locations" referencedColumnNames="online_location_id" deferrable="false" initiallyDeferred="false" />
+		<addForeignKeyConstraint constraintName="online_hospital_state_fk" baseTableName="online_hospitals" baseColumnNames="online_hospital_state" referencedTableName="online_locations" referencedColumnNames="online_location_id" deferrable="false" initiallyDeferred="false" />
+		<addForeignKeyConstraint constraintName="online_hospital_district_fk" baseTableName="online_hospitals" baseColumnNames="online_hospital_district" referencedTableName="online_locations" referencedColumnNames="online_location_id" deferrable="false" initiallyDeferred="false" />
+
+	</changeSet>
+	<changeSet id="onlineappointment-2021-08-17-19:55" author="vishwajeet">
+		<createTable tableName="online_appointment_request">
+			<column name="appointment_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="patient_id" type="varchar(100)"></column>
+			<column name="hospital_id" type="varchar(10)"></column>
+			<column name="district_id" type="varchar(10)"></column>
+			<column name="hospital_url" type="varchar(255)"></column>
+			<column name="patient_mobile" type="varchar(15)"></column>
+			<column name="patient_adhar" type="varchar(15)"></column>
+			<column name="appointment_status" type="varchar(10)"></column>
+			<column name="appointment_date" type="DATETIME" />
+			<column name="appointment_cancellation_date" type="DATETIME" />
+			<column name="appointment_creation_date" type="DATETIME" />
+		</createTable>
+
+	</changeSet>
+	<changeSet id="onlineappointment-2021-08-26-19:55" author="vishwajeet">
+		<addColumn tableName="online_appointment_request">
+			<column name="patient_name" type="varchar(100)"></column>
+			<column name="patient_gender" type="varchar(10)"></column>
+			<column name="patient_age" type="varchar(10)"></column>
+			<column name="hospital_name" type="varchar(100)"></column>
+			<column name="district_name" type="varchar(100)"></column>
+		</addColumn>
+
+	</changeSet>
+
+	<changeSet id="onlineappointment-2021-09-10-12:27" author="shubham">
+		<addColumn tableName="online_hospitals">
+			<column name="online_hospital_url" type="varchar(255)"></column>
+		</addColumn>
+		<addColumn tableName="online_appointment_request">
+			<column name="hospital_appointment_id" type="varchar(100)"></column>
+		</addColumn>
+
+	</changeSet>
+
+
+</databaseChangeLog>
