@@ -11,9 +11,10 @@ package org.openmrs.module.onlineappointment.api.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.openmrs.api.APIException;
+import java.text.ParseException;
 import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
@@ -115,4 +116,31 @@ public class OnlineappointmentImpl extends BaseOpenmrsService implements Onlinea
 		return dao.cancelOnlineAppointment(appointment_id);
 	}
 	
+	@Override
+	public List<Map<String, Object>> getHospitalCount(String district) throws APIException {
+		return dao.getHospitalCount(district);
+	}
+	
+	/*@Override
+	public List<Map<String, Object>> getAppointmentCount2(String district_id, String hospital_id, String from_date,
+	        String to_date) throws APIException, ParseException {
+		return dao.getAppointmentCount2(district_id, hospital_id, from_date, to_date);
+	}*/
+	
+	@Override
+	public List<Map<String, Object>> getAppointmentCount(String district_id, String hospital_id, String from_date,
+	        String to_date) throws APIException, ParseException {
+		return dao.getAppointmentCount(district_id, hospital_id, from_date, to_date);
+	}
+	
+	@Override
+	public List<Online_appointment> getAppointmentByDate(String from_date, String to_date) throws APIException,
+	        ParseException {
+		return dao.getAppointmentByDate(from_date, to_date);
+	}
+	
+	@Override
+	public List<Map<String, Object>> getDistrictCount() throws APIException {
+		return dao.getDistrictCount();
+	}
 }

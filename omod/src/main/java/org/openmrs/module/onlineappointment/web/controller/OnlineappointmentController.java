@@ -12,7 +12,7 @@ package org.openmrs.module.onlineappointment.web.controller;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
-
+import java.text.ParseException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.onlineappointment.Online_OTP;
 import org.openmrs.module.onlineappointment.Online_appointment;
@@ -165,4 +165,55 @@ public class OnlineappointmentController extends MainResourceController {
 		return cancelappointment;
 	}
 	
+	@RequestMapping(value = "/onlineAppointments", method = RequestMethod.GET)
+	@ResponseBody
+	public Object getAppointmentByDate(@RequestParam String frdate, @RequestParam String todate) throws ParseException {
+		
+		SimpleObject appointments = new SimpleObject();
+		
+		appointments.add("appointments", ConversionUtil.convertToRepresentation(
+		    online_app_Service.getAppointmentByDate(frdate, todate), Representation.REF));
+		return appointments;
+	}
+	
+	@RequestMapping(value = "/allhospitals", method = RequestMethod.GET)
+	@ResponseBody
+	public Object getHospitalCount(@RequestParam(required = false) String district) {
+		
+		SimpleObject hospitalCount = new SimpleObject();
+		hospitalCount
+		        .add("hospital_count", ConversionUtil.convertToRepresentation(online_app_Service.getHospitalCount(district)
+		                .size(), Representation.REF));
+		hospitalCount.add("hospital_data",
+		    ConversionUtil.convertToRepresentation(online_app_Service.getHospitalCount(district), Representation.REF));
+		return hospitalCount;
+	}
+	
+	@RequestMapping(value = "/appointments", method = RequestMethod.GET)
+	@ResponseBody
+	public Object getAppointmentCount(@RequestParam(required = false, value = "district_id") String district_id,
+	        @RequestParam(required = false, value = "hospital_id") String hospital_id,
+	        @RequestParam(required = false, value = "from_date") String from_date,
+	        @RequestParam(required = false, value = "to_date") String to_date) throws ParseException {
+		
+		SimpleObject appointmentCount = new SimpleObject();
+		
+		appointmentCount.add(
+		    "appointmentDetail",
+		    ConversionUtil.convertToRepresentation(
+		        online_app_Service.getAppointmentCount(district_id, hospital_id, from_date, to_date), Representation.REF));
+		return appointmentCount;
+	}
+	
+	@RequestMapping(value = "/districts", method = RequestMethod.GET)
+	@ResponseBody
+	public Object getDistrictCount() {
+		
+		SimpleObject districtCount = new SimpleObject();
+		districtCount.add("district_count",
+		    ConversionUtil.convertToRepresentation(online_app_Service.getDistrictCount().size(), Representation.REF));
+		districtCount.add("district_list",
+		    ConversionUtil.convertToRepresentation(online_app_Service.getDistrictCount(), Representation.REF));
+		return districtCount;
+	}
 }

@@ -10,10 +10,16 @@
 package org.openmrs.module.onlineappointment.api.dao;
 
 import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
+import java.text.ParseException;
+
+import org.hibernate.Hibernate;
+
+import org.hibernate.Query;
+import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.api.APIException;
 import org.openmrs.api.db.DAOException;
@@ -24,7 +30,11 @@ import org.openmrs.module.onlineappointment.Online_hospitals;
 import org.openmrs.module.onlineappointment.Online_location_type;
 import org.openmrs.module.onlineappointment.Online_locations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.criterion.ProjectionList;
+import org.hibernate.criterion.Projections;
 import org.springframework.stereotype.Repository;
+import org.hibernate.criterion.Projection;
+import java.text.SimpleDateFormat;
 
 @Repository("onlineappointment.OnlineappointmentDao")
 public class OnlineappointmentDao {
@@ -123,4 +133,186 @@ public class OnlineappointmentDao {
 		}
 		return (List<Online_appointment>) criteria.list();
 	}
+	
+	public List<Map<String, Object>> getHospitalCount(String district) {
+		
+		Criteria criteria = getSession().createCriteria(Online_hospitals.class);
+		Projection projection1 = Projections.property("online_hospital_id");
+		Projection projection2 = Projections.property("online_hospital_name");
+		Projection projection3 = Projections.property("online_hospital_district");
+		ProjectionList pList = Projections.projectionList();
+		pList.add(projection1);
+		pList.add(projection2);
+		pList.add(projection3);
+		if (StringUtils.isNotBlank(district)) {
+			criteria.add(Restrictions.eq("online_hospital_district",
+			    (Online_locations) getSession().get(Online_locations.class, Integer.parseInt(district))));
+		}
+		criteria.setProjection(pList);
+		List<Map<String, Object>> returnList = new ArrayList<Map<String, Object>>();
+		List list2 = criteria.list();
+		int districtCount = 0;
+		if (list2.size() > 0) {
+			districtCount = districtCount++;
+			ListIterator it2 = list2.listIterator();
+			while (it2.hasNext()) {
+				Object[] obj = (Object[]) it2.next();
+				Map<String, Object> hospMap = new HashMap<String, Object>();
+				//obj[2];
+				//Map<String, String> name = (Map<String, String>) obj[2];
+				//Online_locations[] obj2 = (Online_locations[]) obj[2];
+				//hospMap.put("districtName", obj[2]);
+				hospMap.put("hospitalId", obj[0]);
+				hospMap.put("hospitalName", obj[1]);
+				returnList.add(hospMap);
+			}
+			
+		}
+		return (List<Map<String, Object>>) returnList;
+		
+	}
+	
+	public String getDistrict_name(int districtId) {
+		Online_locations onlineLocations = new Online_locations();
+		onlineLocations.setOnline_location_id(districtId);
+		return onlineLocations.getOnline_location_name();
+	}
+	
+	public List<Map<String, Object>> getDistrictCount() {
+		
+		Criteria criteria = getSession().createCriteria(Online_locations.class);
+		
+		Projection projection1 = Projections.property("online_location_id");
+		Projection projection2 = Projections.property("online_location_name");
+		ProjectionList pList = Projections.projectionList();
+		pList.add(projection1);
+		pList.add(projection2);
+		criteria.add(Restrictions.eq("online_location_type_id",
+		    (Online_locations) getSession().get(Online_locations.class, 3)));
+		criteria.setProjection(pList);
+		
+		List<Map<String, Object>> returnList = new ArrayList<Map<String, Object>>();
+		List list2 = criteria.list();
+		if (list2.size() > 0) {
+			Iterator it2 = list2.iterator();
+			
+			while (it2.hasNext()) {
+				Object[] obj = (Object[]) it2.next();
+				Map<String, Object> distMap = new HashMap<String, Object>();
+				distMap.put("districtId", obj[0]);
+				distMap.put("districtName", obj[1]);
+				returnList.add(distMap);
+			}
+		}
+		return (List<Map<String, Object>>) returnList;
+	}
+	
+	public List<Online_appointment> getAppointmentByDate(String from_date, String to_date) throws ParseException {
+		Criteria criteria = getSession().createCriteria(Online_appointment.class);
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		Date strDate = formatter.parse(from_date);
+		Date toDate = formatter.parse(to_date);
+		criteria.add(Restrictions.ge("appointment_date", strDate));
+		criteria.add(Restrictions.lt("appointment_date", toDate));
+		
+		return (List<Online_appointment>) criteria.list();
+	}
+	
+	public List<Map<String, Object>> getAppointmentCount(String district_id, String hospital_id, String from_date,
+	        String to_date) throws ParseException {
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		Criteria criteria = getSession().createCriteria(Online_appointment.class);
+		Projection projection1 = Projections.rowCount();
+		Projection projection2 = Projections.property("patient_gender");
+		ProjectionList pList = Projections.projectionList();
+		pList.add(projection1);
+		pList.add(projection2);
+		if (StringUtils.isNotBlank(district_id)) {
+			criteria.add(Restrictions.eq("district_id", district_id));
+		}
+		if (StringUtils.isNotBlank(hospital_id)) {
+			criteria.add(Restrictions.eq("hospital_id", hospital_id));
+		}
+		if (StringUtils.isNotBlank(from_date)) {
+			Date strDate = formatter.parse(from_date);
+			criteria.add(Restrictions.ge("appointment_date", strDate));
+		}
+		if (StringUtils.isNotBlank(to_date)) {
+			Date endDate = formatter.parse(to_date);
+			criteria.add(Restrictions.le("appointment_date", endDate));
+		}
+		criteria.setProjection(pList);
+		
+		List<Map<String, Object>> returnList = new ArrayList<Map<String, Object>>();
+		List list2 = criteria.list();
+		Map<String, Object> appointMap = new HashMap<String, Object>();
+		
+		//returnList.add(appointMap);
+		Iterator it2 = list2.iterator();
+		int femaleCount = 0;
+		int maleCount = 0;
+		while (it2.hasNext()) {
+			Object[] obj = (Object[]) it2.next();
+			appointMap.put("totalappointmentCount", obj[0]);
+			if (obj[1].equals((CharSequence) "M")) {
+				maleCount = maleCount + 1;
+			} else if (obj[1].equals((CharSequence) "F")) {
+				femaleCount = femaleCount + 1;
+			}
+		}
+		
+		appointMap.put("maleCount", maleCount);
+		appointMap.put("femaleCount", femaleCount);
+		returnList.add(appointMap);
+		
+		return (List<Map<String, Object>>) returnList;
+		
+	}
+	
+	/*public List<Map<String, Object>> getAppointmentCount2(String district_id, String hospital_id, String from_date,
+	        String to_date) throws ParseException {
+		
+		String hql = "SELECT COUNT(appointment_id), patient_gender, monthname(appointment_date) "
+		        + "FROM onlineappointment.online_appointment"
+		        + " GROUP BY patient_gender,(appointment_date), YEAR(appointment_date) "
+		        + "order by month(appointment_date)";
+		Query query = getSession().createQuery(hql);
+		List list2 = query.list();
+		Map<String, Object> appointMap = new LinkedHashMap<String, Object>();
+		List<Map<String, Object>> returnList = new ArrayList<Map<String, Object>>();
+		Iterator it2 = list2.iterator();
+		int femaleCount = 0;
+		int maleCount = 0;
+		int totalCount = 0;
+		while (it2.hasNext()) {
+			Map<String, Object> appointMap2 = new LinkedHashMap<String, Object>();
+			Object[] obj = (Object[]) it2.next();
+			totalCount = totalCount + Integer.parseInt(obj[0].toString());
+			int monthCount = Integer.parseInt(obj[0].toString());
+			
+			if (appointMap2.containsKey("monthName")) {
+				monthCount = monthCount + Integer.parseInt(obj[0].toString());
+			} else {
+				appointMap2.put("monthName", obj[2]);
+			}
+			appointMap2.put("monthCount", monthCount);
+			if (obj[1].equals((CharSequence) "M")) {
+				maleCount = maleCount + Integer.parseInt(obj[0].toString());
+				appointMap2.put("month_maleCount", obj[0]);
+			}
+			if (obj[1].equals((CharSequence) "F")) {
+				femaleCount = femaleCount + Integer.parseInt(obj[0].toString());
+				appointMap2.put("month_femaleCount", obj[0]);
+			}
+			
+			appointMap.put("totalAppointment", totalCount);
+			appointMap.put("totalMale", maleCount);
+			appointMap.put("totalFemale", femaleCount);
+			appointMap.put(obj[2] + "-Data", appointMap2);
+		}
+		returnList.add(appointMap);
+		return (List<Map<String, Object>>) returnList;
+		
+	}*/
 }

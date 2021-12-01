@@ -9,9 +9,10 @@
  */
 package org.openmrs.module.onlineappointment.api;
 
-import java.util.List;
+import java.util.*;
 
 import org.openmrs.api.APIException;
+import java.text.ParseException;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.onlineappointment.Online_OTP;
 import org.openmrs.module.onlineappointment.Online_appointment;
@@ -57,4 +58,22 @@ public interface OnlineappointmentService extends OpenmrsService {
 	@Transactional(readOnly = true)
 	public List<Online_appointment> getOnlineAppointment(String mobile_no, String adhar) throws APIException;
 	
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> getHospitalCount(String district) throws APIException;
+	
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> getAppointmentCount(String district_id, String hospital_id, String from_date,
+	        String to_date) throws APIException, ParseException;
+	
+	/*@Transactional(readOnly = true)
+	public List<Map<String, Object>> getAppointmentCount2(String district_id, String hospital_id, String from_date,
+	        String to_date) throws APIException, ParseException;
+			*/
+	
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> getDistrictCount() throws APIException;
+	
+	@Transactional(readOnly = true)
+	public List<Online_appointment> getAppointmentByDate(String from_date, String to_date) throws APIException,
+	        ParseException;
 }
