@@ -53,7 +53,7 @@ public interface OnlineappointmentService extends OpenmrsService {
 	public Online_appointment saveOnlineAppointment(Online_appointment appointment) throws APIException;
 	
 	@Transactional(readOnly = false)
-	public Online_appointment cancelOnlineAppointment(String appointment_id) throws APIException;
+	public Online_appointment statusOnlineAppointment(String appointment_id, String status) throws APIException;
 	
 	@Transactional(readOnly = true)
 	public List<Online_appointment> getOnlineAppointment(String mobile_no, String adhar) throws APIException;

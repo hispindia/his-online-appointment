@@ -10,6 +10,8 @@
 package org.openmrs.module.onlineappointment.web.controller;
 
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
@@ -34,6 +36,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.openmrs.Visit;
+import org.openmrs.Patient;
+import org.openmrs.api.VisitService;
+import org.openmrs.api.PatientService;
 
 /**
  * Controller that lets a client check the status of their session, and log out. (Authenticating is
@@ -155,14 +161,26 @@ public class OnlineappointmentController extends MainResourceController {
 		return listappointment;
 	}
 	
-	@RequestMapping(value = "/cancelappointment", method = RequestMethod.POST)
+	@RequestMapping(value = "/appointmentstatus", method = RequestMethod.POST)
 	@ResponseBody
-	public Object cancelappointment(String appointment_id) {
+	public Object appointmentstatus(String appointment_id, String status) {
 		
-		SimpleObject cancelappointment = new SimpleObject();
-		cancelappointment.add("cancelappointment", ConversionUtil.convertToRepresentation(
-		    online_app_Service.cancelOnlineAppointment(appointment_id), Representation.REF));
-		return cancelappointment;
+		SimpleObject appointmentstatus = new SimpleObject();
+		appointmentstatus.add("appointmentstatus", ConversionUtil.convertToRepresentation(
+		    online_app_Service.statusOnlineAppointment(appointment_id, status), Representation.REF));
+		return appointmentstatus;
+	}
+	
+	@RequestMapping(value = "/onlinePatientVisits", method = RequestMethod.GET)
+	@ResponseBody
+	public Object getOnlinePatientVisit(@RequestParam String patientId) throws ParseException {
+		
+		Patient patient = Context.getService(PatientService.class).getPatientByUuid(patientId);
+		List<Visit> visits = new ArrayList<Visit>(Context.getService(VisitService.class).getVisitsByPatient(patient));
+		
+		SimpleObject onlineVisits = new SimpleObject();
+		onlineVisits.add("visits", ConversionUtil.convertToRepresentation(visits, Representation.REF));
+		return onlineVisits;
 	}
 	
 	@RequestMapping(value = "/onlineAppointments", method = RequestMethod.GET)
@@ -170,7 +188,6 @@ public class OnlineappointmentController extends MainResourceController {
 	public Object getAppointmentByDate(@RequestParam String frdate, @RequestParam String todate) throws ParseException {
 		
 		SimpleObject appointments = new SimpleObject();
-		
 		appointments.add("appointments", ConversionUtil.convertToRepresentation(
 		    online_app_Service.getAppointmentByDate(frdate, todate), Representation.REF));
 		return appointments;

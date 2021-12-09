@@ -112,8 +112,8 @@ public class OnlineappointmentImpl extends BaseOpenmrsService implements Onlinea
 	}
 	
 	@Override
-	public Online_appointment cancelOnlineAppointment(String appointment_id) throws APIException {
-		return dao.cancelOnlineAppointment(appointment_id);
+	public Online_appointment statusOnlineAppointment(String appointment_id, String status) throws APIException {
+		return dao.statusOnlineAppointment(appointment_id, status);
 	}
 	
 	@Override

@@ -107,12 +107,12 @@ public class OnlineappointmentDao {
 		
 	}
 	
-	public Online_appointment cancelOnlineAppointment(String appointment_id) throws DAOException {
+	public Online_appointment statusOnlineAppointment(String appointment_id, String status) throws DAOException {
 		
 		Online_appointment ola = (Online_appointment) getSession().get(Online_appointment.class,
 		    Integer.parseInt(appointment_id));
 		ola.setAppointment_cancellation_date(new Date());
-		ola.setAppointment_status("CANCELLED");
+		ola.setAppointment_status(status);
 		getSession().saveOrUpdate(ola);
 		return ola;
 		
