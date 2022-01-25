@@ -62,6 +62,12 @@ public class Online_appointment implements Serializable {
 	@Basic
 	private String district_name;
 	
+	@Basic
+	private String doc_name;
+	
+	@Basic
+	private String department_name;
+	
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date appointment_date;
 	
@@ -85,6 +91,22 @@ public class Online_appointment implements Serializable {
 	
 	public void setHospital_appointment_id(String hospital_appointment_id) {
 		this.hospital_appointment_id = hospital_appointment_id;
+	}
+	
+	public String getDoc_name() {
+		return doc_name;
+	}
+	
+	public void setDoc_name(String doc_name) {
+		this.doc_name = doc_name;
+	}
+	
+	public String getDepartment_name() {
+		return department_name;
+	}
+	
+	public void setDepartment_name(String department_name) {
+		this.department_name = department_name;
 	}
 	
 	public String getPatient_id() {
